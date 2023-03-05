@@ -1,11 +1,15 @@
 package monsterservice.controller;
 
+import monsterservice.handleExceptionError.HandleExceptionError;
 import monsterservice.model.Monster;
 import monsterservice.service.MonsterService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/monster")
@@ -35,24 +39,36 @@ public class MonsterController {
     ;
 
     @GetMapping("/get-information")
-    public Monster getInformation(@RequestHeader Integer id) { // RequestHeader รับค่าทาง Header
+    public Optional<Monster> getInformation(@RequestHeader Integer id) { // RequestHeader รับค่าทาง Header
         return monsterService.getInformationService(id);
     }
 
     @PutMapping("/update")
-    public Monster putUpdate(@RequestBody Monster monster) { // RequestHeader รับค่าทาง Header
-        return monsterService.updateMonsterByIdService(monster);
+    public ResponseEntity<Monster> putUpdate(@RequestBody Monster monster) throws HandleExceptionError { // RequestHeader รับค่าทาง Header
+        try {
+            return new ResponseEntity<>(monsterService.updateMonsterByIdService(monster), HttpStatus.OK);
+        } catch (HandleExceptionError ex) {
+            return new ResponseEntity<>(new Monster(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @DeleteMapping("/delete")
-    public boolean delete(@RequestHeader Integer id) { // RequestHeader รับค่าทาง Header
-        return monsterService.deleteMonsterService(id);
+    public ResponseEntity<Boolean> delete(@RequestHeader Integer id) throws HandleExceptionError { // RequestHeader รับค่าทาง Header
+        try {
+            return new ResponseEntity<>(monsterService.deleteMonsterService(id), HttpStatus.OK);
+        } catch (HandleExceptionError ex) {
+            return new ResponseEntity<>(false, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/attack")
-    public Monster putAttack(@RequestHeader Integer id, @RequestHeader Integer health) {
+    public ResponseEntity<String> putAttack(@RequestHeader Integer id, @RequestHeader Integer damage) throws HandleExceptionError {
         // RequestHeader รับค่าทาง Header
-        return monsterService.attackMonsterService(id, health);
+        try {
+            return new ResponseEntity<>(monsterService.attackMonsterService(id, damage), HttpStatus.OK);
+        } catch (HandleExceptionError ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
